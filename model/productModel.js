@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const productSchema =  mongoose.Schema({
+const productSchema =  new mongoose.Schema({
     // _id: mongoose.Schema.Types.ObjectId,
     name: {
         type : String,

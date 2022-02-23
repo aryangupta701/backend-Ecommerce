@@ -18,11 +18,23 @@ class ApiFeatures {
         const queryCopy = {...this.queryStr}
         const removeFields = ["keyword", "page", "limit"]
         removeFields.forEach( (key) => delete queryCopy[key])
+        
 
-        this.query = this.query.find(queryCopy)
+        //filter to price and rating
+        let tempStr = JSON.stringify(queryCopy)
+        tempStr = tempStr.replace(/\b(gt|gte|lt|lte)\b/g , key => `$${key}`)
+
+        this.query = this.query.find(JSON.parse(tempStr))
         return this
     }
 
+    pagination( productperpage ){
+        const currentPage = this.queryStr.page || 1
+        const skip = productperpage * (currentPage-1)
+
+        this.query = this.query.limit(productperpage).skip(skip)
+        return this
+    }
 }
 
 module.exports = ApiFeatures;
