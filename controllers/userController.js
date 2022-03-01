@@ -2,10 +2,10 @@ const User = require('../model/userModel')
 const ErrorHandler = require('../util/errorhandler')
 const catchAsyncError = require('../middlewares/catchAsyncError')
 const jwtToken = require('../util/jwtToken')
-// const req = require('express/lib/request')
 const sendEmail = require('../util/sendemail')
 const crypto = require('crypto')
 const bcrypt = require('bcryptjs')
+
 //register a User
 exports.registerUser = catchAsyncError(async(req,res,next) => {
     const {name , email , password} = req.body;
@@ -130,12 +130,11 @@ exports.updateUserDetails = catchAsyncError(async(req,res,next)=>{
     user = await User.findByIdAndUpdate(req.user.id , req.body, {
         new: true, 
         runValidators:true,
-        useFindAndModify : true
+        useFindAndModify : false
     })
 
     res.status(200).json({
-        success: true, 
-        message: "User Details Updated",
+        success : true,
         user
     })
 })
@@ -156,10 +155,61 @@ exports.updatePassword = catchAsyncError(async(req,res,next)=>{
 
     user.password = req.body.newPassword
     await user.save()
-    
+
+    jwtToken(user,200,res)
+})
+
+//get  all user (admin)
+exports.getAllUsers = catchAsyncError(async(req,res,next)=>{
+    const users = await User.find({role : "User"})
+
     res.status(200).json({
         success : true, 
-        message : "Password Changed Successfully"
+        users
     })
 })
 
+//get  single user details (admin)
+exports.getSingleUser = catchAsyncError( async(req,res,next)=>{
+    const user = await User.findById(req.params.id)
+    if(!user){
+        return next(new ErrorHandler(`User doesnot Exist with the ID ${req.params.id}`, 404))
+    }
+    res.status(200).json({
+        success : true, 
+        user
+    })
+})
+
+
+//updateUserRole 
+exports.updateUserRole = catchAsyncError(async(req,res,next)=>{
+    let user = await User.findById(req.user.id)
+
+    user = await User.findByIdAndUpdate(req.user.id , req.body, {
+        new: true, 
+        runValidators:true,
+        useFindAndModify : false
+    })
+
+    res.status(200).json({
+        success : true,
+        user
+    })
+})
+
+//deleteUser 
+exports.deleteUser = catchAsyncError(async(req,res,next)=>{
+    const user = await User.findByIdAndUpdate(req.params.id)
+
+    if(!user){
+        return next(new ErrorHandler(`User doesnot exist with ID : ${req.params.id}`, 404))
+    }
+
+    await user.remove()
+
+    res.status(200).json({
+        success : true,
+        message : "user deleted successfully"
+    })
+})

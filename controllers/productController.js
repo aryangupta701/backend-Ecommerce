@@ -41,7 +41,7 @@ exports.updateProduct = catchAsyncError(async(req,res,next) => {
     prod = await product.findByIdAndUpdate(req.params.id , req.body, {
         new: true, 
         runValidators:true,
-        useFindAndModify : true
+        useFindAndModify : false
     })
     res.status(200).json({
         success: true, 
@@ -69,5 +69,49 @@ exports.getProduct = catchAsyncError( async(req,res,next)=>{
     res.status(200).json({
         success : true ,
         prod
+    })
+})
+
+//create new review or edit review 
+exports.createProductReview = catchAsyncError(async(req,res,next)=>{
+
+    const {rating, comment , productId} = req.body
+    const review = {
+        user : req.user._id, 
+        name : req.user.name , 
+        rating : Number(rating),
+        comment
+    }
+
+    const Product = await product.findById(productId)
+    const isReviewed = Product.reviews.find( rev => rev.user.toString() === req.user._id)
+    if(isReviewed){
+        Product.reviews.forEach((rev) => {
+            if(rev.user.toString() === req.user._id){
+                rev.rating = rating 
+                rev.comment = comment 
+                
+            }
+            
+        })
+    }
+    else {
+        Product.reviews.push(review)
+        // Product.numOfReviews = Product.reviews.length
+    }
+
+    let avg = 0
+    Product.ratings = Product.reviews.forEach( rev=> {
+        avg += rev.rating
+    })
+    avg = avg/Product.reviews.length
+
+    await Product.save({
+        validateBeforeSave: false
+    })
+
+    res.status(200).json({
+        success : true, 
+        message : "reviewed Successfully"
     })
 })
