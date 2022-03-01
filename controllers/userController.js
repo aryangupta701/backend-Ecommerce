@@ -2,8 +2,9 @@ const User = require('../model/userModel')
 const ErrorHandler = require('../util/errorhandler')
 const catchAsyncError = require('../middlewares/catchAsyncError')
 const jwtToken = require('../util/jwtToken')
-const req = require('express/lib/request')
-const sendEmail = requie('../util/sendemail')
+// const req = require('express/lib/request')
+const sendEmail = require('../util/sendemail')
+const crypto = require('crypto')
 
 //register a User
 exports.registerUser = catchAsyncError(async(req,res,next) => {
@@ -54,7 +55,7 @@ exports.forgotPassword = catchAsyncError(async(req,res,next)=>{
         return next(new ErrorHandler("User Not Found", 404))
     }
 
-    const resetToken = user.getUserPasswordToken()
+    const resetToken = user.getResetPasswordToken()
     await user.save({validateBeforeSave: false})
 
     const resetPasswordUrl = `${req.protocol}://${req.get("host")}/api/v1/password/reset/${resetToken}`
@@ -79,4 +80,33 @@ exports.forgotPassword = catchAsyncError(async(req,res,next)=>{
         return next(new ErrorHandler(error.message , 500))
     }
 
+})
+
+
+//RESET PASSWORD 
+exports.resetPassword = catchAsyncError(async(req,res,next)=>{
+
+    //creating token hash
+    const resetPasswordToken = crypto.createHash("sha256").update(req.params.token).digest("hex")
+    const user = await User.findOne({
+        resetPasswordToken , 
+        resetPasswordExpire : {$gt : Date.now()}
+    })
+
+    if(!user){
+        return next(new ErrorHandler("Reset Password Token is Invalid or has expired !", 400))
+    }
+
+    if(req.body.password != req.body.confirmPassword){
+        return next(new ErrorHandler("Password donot match", 400))
+    }
+
+    user.password = req.body.password
+    user.resetPasswordToken = undefined
+    user.resetPasswordExpire = undefined
+
+    await user.save()
+
+    //user logged in
+    jwtToken(user,200,res)
 })
