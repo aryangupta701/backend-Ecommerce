@@ -5,7 +5,7 @@ const jwtToken = require('../util/jwtToken')
 // const req = require('express/lib/request')
 const sendEmail = require('../util/sendemail')
 const crypto = require('crypto')
-
+const bcrypt = require('bcryptjs')
 //register a User
 exports.registerUser = catchAsyncError(async(req,res,next) => {
     const {name , email , password} = req.body;
@@ -21,6 +21,7 @@ exports.registerUser = catchAsyncError(async(req,res,next) => {
 
 // login User
 exports.loginUser = catchAsyncError(async(req,res,next) => {
+
     const {email, password} = req.body 
     if(!email || !password){
         return next( new ErrorHandler("Please Enter Email and Password " , 400))
@@ -29,11 +30,12 @@ exports.loginUser = catchAsyncError(async(req,res,next) => {
     if(!user){
         return next(new ErrorHandler("User Not Found", 401))
     }
-    const isCorrect = user.comparePassword(password)
+    const isCorrect = await user.comparePassword(password)
     if(!isCorrect){
         return next(new ErrorHandler("Password Invalid" , 401))
     }
     jwtToken(user,200,res)
+
 })
 
 //logout User
@@ -110,3 +112,54 @@ exports.resetPassword = catchAsyncError(async(req,res,next)=>{
     //user logged in
     jwtToken(user,200,res)
 })
+
+//getUserDetails
+exports.getUserDetails = catchAsyncError( async ( req,res,next) => {
+    const user = await User.findById(req.user.id)
+
+    res.status(200).json({
+        success : true, 
+        user
+    })
+})
+
+//updateUserDetails 
+exports.updateUserDetails = catchAsyncError(async(req,res,next)=>{
+    let user = await User.findById(req.user.id)
+
+    user = await User.findByIdAndUpdate(req.user.id , req.body, {
+        new: true, 
+        runValidators:true,
+        useFindAndModify : true
+    })
+
+    res.status(200).json({
+        success: true, 
+        message: "User Details Updated",
+        user
+    })
+})
+
+//changePassword
+exports.updatePassword = catchAsyncError(async(req,res,next)=>{
+    const user  = await User.findById(req.user.id).select("+password")
+
+    const isMatched = await user.comparePassword(req.body.oldPassword)
+
+    if(!isMatched){
+        return next(new ErrorHandler("Old Password is Incorrect", 400))
+    }
+
+    if(req.body.newPassword !== req.body.confirmPassword){
+        return next(new ErrorHandler("Confirm Password do not match with new Password" , 400))
+    }
+
+    user.password = req.body.newPassword
+    await user.save()
+    
+    res.status(200).json({
+        success : true, 
+        message : "Password Changed Successfully"
+    })
+})
+
