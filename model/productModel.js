@@ -14,7 +14,7 @@ const productSchema =  new mongoose.Schema({
         required: [true,"Please Enter Product Price"],
         maxlength : [8,"Please Enter a Valid Price"]
     },
-    rating : {
+    ratings : {
         type: Number , 
         default : 0
     },
@@ -43,7 +43,7 @@ const productSchema =  new mongoose.Schema({
         type : Number ,
         default : 0
     },
-    Reviews :[{
+    reviews :[{
         name : {
             type : String,
             required : [true, "Please Enter Your Name"]
@@ -59,7 +59,7 @@ const productSchema =  new mongoose.Schema({
 
     }],
     user : {
-        required : true,
+        // required : true,
         type : mongoose.Schema.ObjectId,
         ref : "User"
     },
