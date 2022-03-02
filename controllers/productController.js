@@ -41,7 +41,7 @@ exports.updateProduct = catchAsyncError(async(req,res,next) => {
     prod = await product.findByIdAndUpdate(req.params.id , req.body, {
         new: true, 
         runValidators:true,
-        useFindAndModify : true
+        useFindAndModify : false
     })
     res.status(200).json({
         success: true, 
@@ -69,5 +69,97 @@ exports.getProduct = catchAsyncError( async(req,res,next)=>{
     res.status(200).json({
         success : true ,
         prod
+    })
+})
+
+//create new review or edit review 
+exports.createProductReview = catchAsyncError(async(req,res,next)=>{
+
+    const {rating, comment , productId} = req.body
+    const review = {
+        user : req.user._id, 
+        name : req.user.name , 
+        rating : Number(rating),
+        comment
+    }
+
+    const Product = await product.findById(productId)
+    const isReviewed = Product.reviews.find( rev => rev.user.toString() === req.user._id)
+    if(isReviewed){
+        Product.reviews.forEach(rev => {
+            if(rev.user.toString() === req.user._id){
+                rev.rating = rating 
+                rev.comment = comment 
+                
+            }
+            
+        })
+    }
+    else {
+        Product.reviews.push(review)
+        Product.numofReviews = Product.reviews.length
+    }
+
+    let avg = 0
+    Product.ratings = Product.reviews.forEach( rev=> {
+        avg += rev.ratings
+    })
+    avg = avg/Product.reviews.length
+
+    await Product.save({
+        validateBeforeSave: false
+    })
+
+    res.status(200).json({
+        success : true, 
+        message : "reviewed Successfully"
+    })
+})
+
+//get all the reviews of a product 
+exports.getAllReviews = catchAsyncError(async(req,res,next)=>{
+    const Product = product.findById(req.query.id)
+    if(!Product){
+        return next(new ErrorHandler("Product Not Found",404))
+    }
+
+    res.status(200).json({
+        success : true , 
+        reviews : Product.reviews
+    })
+})
+
+//delete review
+exports.deleteReview = catchAsyncError(async(req,res,next)=>{
+    const Product = product.findById(req.query.productId)
+    if(!Product){
+        return next(new ErrorHandler("Product Not Found",404))
+    }
+
+    const reviews = Product.reviews.filter(rev => rev._id.toString() !== req.query.id.toString())
+
+    let avg = 0
+    const ratings = reviews.forEach( rev=> {
+        avg += rev.ratings
+    })
+    avg = avg/reviews.length
+    const numOfReviews = reviews.length
+
+    await Product.findByIdAndUpdate(req.query.productId , {
+        reviews, 
+        ratings,
+        numOfReviews
+    }, 
+    {
+        new : true,
+        runValidators : true,
+        useFindAndModify : false
+    }
+
+    )
+
+    res.status(200).json({
+        success : true , 
+        reviews
     })
 })

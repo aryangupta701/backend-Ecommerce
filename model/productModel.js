@@ -48,7 +48,7 @@ const productSchema =  new mongoose.Schema({
             type : String,
             required : [true, "Please Enter Your Name"]
         },
-        rating : {
+        ratings : {
             type : Number ,
             required : true
         },
