@@ -184,18 +184,21 @@ exports.getSingleUser = catchAsyncError( async(req,res,next)=>{
 
 //updateUserRole 
 exports.updateUserRole = catchAsyncError(async(req,res,next)=>{
-    let user = await User.findById(req.user.id)
-
-    user = await User.findByIdAndUpdate(req.user.id , req.body, {
-        new: true, 
-        runValidators:true,
-        useFindAndModify : false
-    })
-
-    res.status(200).json({
-        success : true,
-        user
-    })
+    const newUserData = {
+        name: req.body.name,
+        email: req.body.email,
+        role: req.body.role,
+      };
+    
+      await User.findByIdAndUpdate(req.params.id, newUserData, {
+        new: true,
+        runValidators: true,
+        useFindAndModify: false,
+      });
+    
+      res.status(200).json({
+        success: true,
+      });
 })
 
 //deleteUser 

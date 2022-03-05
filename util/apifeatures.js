@@ -29,7 +29,7 @@ class ApiFeatures {
     }
 
     pagination( productperpage ){
-        const currentPage = this.queryStr.page || 1
+        const currentPage = Number(this.queryStr.page) || 1
         const skip = productperpage * (currentPage-1)
 
         this.query = this.query.limit(productperpage).skip(skip)
