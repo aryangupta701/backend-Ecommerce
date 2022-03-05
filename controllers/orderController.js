@@ -1,7 +1,7 @@
 const Order = require('../model/orderModel')
 const catchAsyncError = require('../middlewares/catchAsyncError')
-const errorhandler = require('../middlewares/error')
 const ErrorHandler = require('../util/errorhandler')
+const Product = require('../model/productModel')
 
 //create new order 
 exports.newOrder = catchAsyncError(async(req,res,next)=>{
@@ -12,7 +12,7 @@ exports.newOrder = catchAsyncError(async(req,res,next)=>{
         itemsPrice,
         taxPrice,
         shippingPrice, 
-        totolPrice,
+        totalPrice,
     } = req.body
 
     const order = await Order.create({
@@ -22,7 +22,7 @@ exports.newOrder = catchAsyncError(async(req,res,next)=>{
         itemsPrice,
         taxPrice,
         shippingPrice, 
-        totolPrice,
+        totalPrice,
         paidAt : Date.now(),
         user : req.user._id
     })
@@ -74,14 +74,13 @@ exports.myOrders = catchAsyncError(async(req,res,next)=>{
 
 //update order Status -- admin
 exports.updateOrder = catchAsyncError(async(req,res,next)=>{
-    const order = await Order.find(req.params.id)
-    
+    const order = await Order.findById(req.params.id)
     if(order.orderStatus === "Delivered"){
         return next(new ErrorHandler("You have already delivered this product", 400))
     }
     
-    order.orderItems.forEach(async(order) => {
-        await updateStock(order.product , order.quantity)
+    order.orderItems.forEach(async(ord) => {
+        await updateStock(ord.product , ord.quantity)
     })
 
     order.orderStatus = req.body.status
@@ -97,11 +96,13 @@ exports.updateOrder = catchAsyncError(async(req,res,next)=>{
 async function updateStock ( id , quantity){
     const product = await Product.findById(id);
     product.stock-=quantity
+
+    await product.save({ validateBeforeSave: false });
 }
 
 //delete Order 
 exports.deleteOrder = catchAsyncError(async(req,res,next)=>{
-    const order = await Order.find(req.params.id)
+    const order = await Order.findById(req.params.id)
     if(!order){
         return next(new ErrorHandler("Order not Found", 404))
     }
