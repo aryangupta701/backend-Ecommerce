@@ -6,7 +6,7 @@ process.on("uncaughtException", err => {
     process.exit(1)
 })
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 4000
 const app = require('./app')
 const server = http.createServer(app)
 const sv = server.listen(PORT)
