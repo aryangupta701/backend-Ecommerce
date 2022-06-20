@@ -16,10 +16,9 @@ exports.getAllProducts = catchAsyncError( async(req,res,next) => {
     apifeat.pagination(productperpage)
     products = await apifeat.query.clone()
 
-    res.status(500).json({
+    res.status(200).json({
         status : true,
         products,
-        error: "thie is errroree",
         productCount,
         filteredProductsCount
     })
@@ -75,7 +74,7 @@ exports.getProduct = catchAsyncError( async(req,res,next)=>{
     }
     res.status(200).json({
         success : true ,
-        prod
+        product : prod
     })
 })
 
