@@ -20,7 +20,8 @@ exports.getAllProducts = catchAsyncError( async(req,res,next) => {
         status : true,
         products,
         productCount,
-        filteredProductsCount
+        filteredProductsCount,
+        resultPerPage: productperpage
     })
 })
 
@@ -118,6 +119,7 @@ exports.createProductReview = catchAsyncError(async(req,res,next)=>{
 
   res.status(200).json({
     success: true,
+    review
   });
 })
 
