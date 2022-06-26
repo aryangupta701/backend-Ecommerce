@@ -1,4 +1,5 @@
 const http = require('http')
+const cloudinary = require('cloudinary')
 //uncaught Exception
 process.on("uncaughtException", err => {
     console.log(`Error : ${err.message}`)
@@ -11,7 +12,11 @@ const app = require('./app')
 const server = http.createServer(app)
 const sv = server.listen(PORT)
 
-
+cloudinary.config({
+    cloud_name : process.env.CLOUD_NAME,
+    api_key : process.env.CLOUD_KEY,
+    api_secret : process.env.API_SECRET 
+})
 
 //unhandled promise rejection
 process.on("unhandledRejection" , err => {
