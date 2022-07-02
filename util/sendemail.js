@@ -4,21 +4,21 @@ const sendEmail = async(options)=>{
     const transporter = nodeMailer.createTransport({
         host : process.env.SMPT_HOST,
         port : process.env.SMPT_PORT,
+        secure: true,
         service : process.env.SMPT_SERVICE ,
         auth : {
             user : process.env.SMPT_EMAIL,
             pass : process.env.SMPT_PASSWORD
         }
-        
     })
 
     const mailOptions = {
-        form : process.env.SMPT_EMAIL,
+        from : process.env.SMPT_EMAIL,
         to : options.email,
         subject : options.subject,
-        message : options.message
+        text : options.message
     }
-
+    console.log(nodeMailer.getTestMessageUrl(mailOptions))
     await transporter.sendMail(mailOptions)
 }
 
