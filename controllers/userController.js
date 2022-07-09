@@ -63,10 +63,11 @@ exports.forgotPassword = catchAsyncError(async(req,res,next)=>{
         return next(new ErrorHandler("User Not Found", 404))
     }
 
-    const resetToken = user.getResetPasswordToken()
+    const resetToken = await user.getResetPasswordToken()
     await user.save({validateBeforeSave: false})
-
-    const resetPasswordUrl = `${req.protocol}://${req.get("host")}/api/v1/password/reset/${resetToken}`
+    console.log(resetToken)
+    // const resetPasswordUrl = `${req.protocol}://${req.get("host")}/password/reset/${resetToken}`
+    const resetPasswordUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`
     const message = `Your password reset Token is :- \n\n ${resetPasswordUrl} \n\nIf you have not requested this email them, please ignore it`
     try{
         await sendEmail({
@@ -95,7 +96,9 @@ exports.forgotPassword = catchAsyncError(async(req,res,next)=>{
 exports.resetPassword = catchAsyncError(async(req,res,next)=>{
 
     //creating token hash
+    // console.log(req.params.token)
     const resetPasswordToken = crypto.createHash("sha256").update(req.params.token).digest("hex")
+    console.log(resetPasswordToken)
     const user = await User.findOne({
         resetPasswordToken , 
         resetPasswordExpire : {$gt : Date.now()}
