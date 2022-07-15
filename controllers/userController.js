@@ -139,10 +139,11 @@ exports.updateUserDetails = catchAsyncError(async(req,res,next)=>{
         name: req.body.name,
         email: req.body.email
       };
-    console.log(newUserData)
+    // console.log(newUserData)
+    // console.log(req.user)
       if (req.body.avatar !== "") {
         const user = await User.findById(req.user.id);
-        console.log(user)
+        // console.log(user)
         const imageId = user.avatar.public_id;
     
         await cloudinary.v2.uploader.destroy(imageId);
