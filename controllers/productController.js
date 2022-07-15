@@ -2,8 +2,7 @@ const product = require('../model/productModel')
 const ErrorHandler = require('../util/errorhandler')
 const catchAsyncError = require('../middlewares/catchAsyncError')
 const ApiFeatures = require('../util/apifeatures')
-
-
+const cloudinary = require('cloudinary')
 
 //get all products
 exports.getAllProducts = catchAsyncError( async(req,res,next) => {
@@ -25,10 +24,31 @@ exports.getAllProducts = catchAsyncError( async(req,res,next) => {
     })
 })
 
+exports.getAdminProducts = catchAsyncError( async(req,res,next) => {
+    const products = await product.find()
+
+    res.status(200).json({
+        status : true,
+        products
+    })
+})
 
 //create new product
 exports.newProduct = catchAsyncError (async(req,res,next) => {
-
+    let images = []
+    if(typeof(req.body.images) === "string"){
+        images.push(req.body.images)
+    }
+    else images = req.body.images
+    let imagesLink = []
+    for(let i=0; i<images.length; i++){
+        const result = await cloudinary.v2.uploader.upload(images[i],{folder:"products"})
+        imagesLink.push({
+            public_id: result.public_id,
+            URL : result.secure_url
+        })
+    }
+    req.body.images = imagesLink
     req.body.user = req.body.id 
     
     const createdProd = await product.create(req.body);
@@ -59,7 +79,17 @@ exports.updateProduct = catchAsyncError(async(req,res,next) => {
 
 //delete a product
 exports.deleteProduct = catchAsyncError( async(req,res,next) => {
-    product.remove({_id : req.params.id}).then(res.status(200).json({
+    const Product = await product.findById(req.params.id)
+    
+    if(!Product){
+        return next(new ErrorHandler("Product Not Found", 404))
+    }
+    //deleting cloudinary images 
+    for(let i=0; i<Product.images.length; i++){
+        await cloudinary.v2.uploader.destroy(Product.images[i].public_id)
+    }
+
+    product.deleteOne({_id : req.params.id}).then(res.status(200).json({
         success : true,
         message : "Removed Successfully"
     })).catch(err=>{

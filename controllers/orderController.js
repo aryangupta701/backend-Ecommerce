@@ -5,6 +5,7 @@ const Product = require('../model/productModel')
 
 //create new order 
 exports.newOrder = catchAsyncError(async(req,res,next)=>{
+    // console.log(req.body)
     const {
         shippingInfo , 
         orderItems, 
@@ -14,7 +15,7 @@ exports.newOrder = catchAsyncError(async(req,res,next)=>{
         shippingPrice, 
         totalPrice,
     } = req.body
-
+    // console.log("hi")
     const order = await Order.create({
         shippingInfo , 
         orderItems, 
@@ -26,7 +27,7 @@ exports.newOrder = catchAsyncError(async(req,res,next)=>{
         paidAt : Date.now(),
         user : req.user._id
     })
-
+    // console.log(order)
     res.status(201).json({
         success : true, 
         order
