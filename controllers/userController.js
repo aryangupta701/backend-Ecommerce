@@ -193,7 +193,9 @@ exports.updatePassword = catchAsyncError(async(req,res,next)=>{
 
 //get  all user (admin)
 exports.getAllUsers = catchAsyncError(async(req,res,next)=>{
-    const users = await User.find({role : "User"})
+    // const users = await User.find({role : "User"})
+    const users = await User.find()
+
 
     res.status(200).json({
         success : true, 
@@ -235,12 +237,14 @@ exports.updateUserRole = catchAsyncError(async(req,res,next)=>{
 
 //deleteUser 
 exports.deleteUser = catchAsyncError(async(req,res,next)=>{
-    const user = await User.findByIdAndUpdate(req.params.id)
+    const user = await User.findById(req.params.id)
 
     if(!user){
         return next(new ErrorHandler(`User doesnot exist with ID : ${req.params.id}`, 404))
     }
-
+    
+    const imageId = user.avatar.public_id;
+    await cloudinary.v2.uploader.destroy(imageId);
     await user.remove()
 
     res.status(200).json({
