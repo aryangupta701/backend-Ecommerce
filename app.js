@@ -11,7 +11,8 @@ app.use(cookieParser())
 app.use(fileUpload())
 app.use(cors({
     credentials: true ,
-    origin: process.env.NODE_ENV !== "PRODUCTION" ? 'http://localhost:3000' : 'https://aryangupta701.github.io/'
+    origin: 'https://aryangupta701.github.io/'
+    // origin: process.env.NODE_ENV !== "PRODUCTION" ? 'http://localhost:3000' : 'https://aryangupta701.github.io/'
 }))
 const errorMiddleware = require('./middlewares/error')
 const mongoose = require('mongoose')
