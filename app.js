@@ -4,14 +4,14 @@ const bodyParser = require('body-parser')
 const fileUpload = require('express-fileupload')
 const cookieParser = require('cookie-parser')
 const path = require('path')
-const cors = require('cors')
+// const cors = require('cors')
 app.use(bodyParser.urlencoded({extended:true}))
 app.use(express.json())
 app.use(cookieParser())
 app.use(fileUpload())
-app.use(cors({
-    origin: 'https://aryangupta701.github.io'
-}))
+// app.use(cors({
+//     origin: 'https://aryangupta701.github.io'
+// }))
 const errorMiddleware = require('./middlewares/error')
 const mongoose = require('mongoose')
 
