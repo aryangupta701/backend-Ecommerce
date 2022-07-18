@@ -10,7 +10,7 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(fileUpload())
 app.use(cors({
-    origin: 'http://192.168.245.30:3000'
+    origin: 'http://localhost:3000'
 }))
 const errorMiddleware = require('./middlewares/error')
 const mongoose = require('mongoose')
