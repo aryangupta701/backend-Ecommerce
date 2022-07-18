@@ -32,6 +32,7 @@ const user = require('./routes/userRoutes')
 const order = require('./routes/orderRoutes')
 const payment = require('./routes/paymentRoutes')
 
+app.set("trust proxy",1)
 
 app.use('/api/v1', product)
 app.use('/api/v1', user )
