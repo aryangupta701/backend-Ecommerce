@@ -10,7 +10,7 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(fileUpload())
 app.use(cors({
-    origin: 'https://aryangupta701.github.io/frontend-Ecommerce/'
+    origin: 'https://aryangupta701.github.io'
 }))
 const errorMiddleware = require('./middlewares/error')
 const mongoose = require('mongoose')
