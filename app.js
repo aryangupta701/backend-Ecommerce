@@ -10,7 +10,7 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(fileUpload())
 app.use(cors({
-    withCredentials: true ,
+    credentials: true ,
     origin: process.env.NODE_ENV !== "PRODUCTION" ? 'http://localhost:3000' : 'https://ecommerce-frontend-appio.herokuapp.com'
 }))
 const errorMiddleware = require('./middlewares/error')
